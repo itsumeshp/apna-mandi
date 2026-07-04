@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Search, ShoppingBag, MapPin, Heart, User, ChevronDown, Package, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart, formatPrice } from "@/lib/cart-store";
@@ -36,9 +36,17 @@ export function SiteHeader() {
   const { count: wishCount } = useWishlist();
   const [q, setQ] = useState("");
   const [mobileNav, setMobileNav] = useState(false);
+  const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => s.location.search as { category?: string } });
   const cd = useCountdown(40 * 24 + 10);
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const query = q.trim();
+    navigate({ to: "/browse", search: query ? { q: query } : {} });
+    setMobileNav(false);
+  };
 
   const isActive = (to: string, sc?: { category?: string }) => {
     if (to !== pathname) return false;
@@ -73,7 +81,7 @@ export function SiteHeader() {
           <div className="flex items-center gap-5">
             <Link to="/" className="hover:text-primary">About Us</Link>
             <Link to="/orders" className="hover:text-primary">My Account</Link>
-            <Link to="/" className="hover:text-primary">Wishlist</Link>
+            <Link to="/wishlist" className="hover:text-primary">Wishlist</Link>
             <span className="hidden lg:inline">
               We deliver every day from <span className="font-mono font-semibold text-foreground">7:00–23:00</span>
             </span>
@@ -125,21 +133,23 @@ export function SiteHeader() {
           </div>
 
           <div className="hidden flex-1 md:flex">
-            <div className="relative w-full">
+            <form onSubmit={submitSearch} role="search" className="relative w-full">
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search for products, categories or brands…"
+                aria-label="Search the store"
                 className="h-11 w-full rounded-full border border-border bg-surface pl-5 pr-32 text-sm outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/15"
               />
               <button
+                type="submit"
                 className="absolute right-1 top-1 inline-flex h-9 items-center gap-2 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground"
                 aria-label="Search"
               >
                 <Search className="size-4" />
                 <span className="hidden lg:inline">Search</span>
               </button>
-            </div>
+            </form>
           </div>
 
           <div className="ml-auto flex items-center gap-1 md:gap-4">
@@ -150,7 +160,8 @@ export function SiteHeader() {
               <User className="size-5" />
               <span className="mt-0.5 text-[10px] font-medium text-muted-foreground">Account</span>
             </Link>
-            <button
+            <Link
+              to="/wishlist"
               className="relative hidden flex-col items-center leading-tight text-foreground md:flex"
               aria-label="Wishlist"
             >
@@ -161,7 +172,7 @@ export function SiteHeader() {
                 </span>
               </div>
               <span className="mt-0.5 text-[10px] font-medium text-muted-foreground">Wishlist</span>
-            </button>
+            </Link>
             <button
               onClick={() => setDrawerOpen(true)}
               className="relative flex items-center gap-2 rounded-full bg-accent px-3 py-2 text-sm font-semibold text-accent-foreground shadow-sm transition-transform hover:-translate-y-px"
@@ -181,15 +192,18 @@ export function SiteHeader() {
 
         {/* Mobile search */}
         <div className="border-t border-border px-4 pb-3 pt-2 md:hidden">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <form onSubmit={submitSearch} role="search" className="relative">
+            <button type="submit" aria-label="Search" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              <Search className="size-4" />
+            </button>
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search the store…"
+              aria-label="Search the store"
               className="h-10 w-full rounded-full border border-border bg-muted pl-10 pr-4 text-sm outline-none focus:border-primary"
             />
-          </div>
+          </form>
         </div>
 
         {/* Category nav bar */}
