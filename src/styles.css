@@ -92,13 +92,3 @@
   h1, h2, h3, h4, h5 { font-family: var(--font-heading); letter-spacing: -0.01em; }
   .font-mono, code, kbd, samp, pre { font-family: var(--font-mono); }
 }
-
-/* Hero: the department word swaps every couple seconds. Animate the swap only
-   when the visitor hasn't asked for reduced motion. */
-@keyframes amWordIn {
-  from { opacity: 0; transform: translateY(0.4em) rotate(-1.5deg); }
-  to   { opacity: 1; transform: translateY(0) rotate(0); }
-}
-@media (prefers-reduced-motion: no-preference) {
-  .am-word { animation: amWordIn 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
-}
