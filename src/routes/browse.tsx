@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { z } from "zod";
-import { ChevronLeft, ChevronRight, LayoutGrid, List, Plus, Minus } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutGrid, List, Plus, Minus, SlidersHorizontal, X } from "lucide-react";
 import { ProductCard } from "@/components/product-card";
 import { brands, categories, productColors, products } from "@/lib/mock-data";
 
@@ -9,6 +9,7 @@ const search = z.object({
   category: z.string().optional(),
   q: z.string().optional(),
   page: z.coerce.number().optional(),
+  sale: z.coerce.boolean().optional(),
 });
 
 export const Route = createFileRoute("/browse")({
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/browse")({
 const PAGE_SIZE = 12;
 
 function Browse() {
-  const { category, q, page } = Route.useSearch();
+  const { category, q, page, sale } = Route.useSearch();
   const currentPage = page ?? 1;
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(500);
@@ -29,6 +30,7 @@ function Browse() {
   const [sort, setSort] = useState<"latest" | "low" | "high" | "rating">("latest");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [openCats, setOpenCats] = useState<string[]>([]);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const toggle = (list: string[], id: string) =>
     list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
@@ -46,19 +48,19 @@ function Browse() {
     if (selectedBrands.length) out = out.filter((p) => selectedBrands.includes(p.brandId));
     if (selectedColors.length) out = out.filter((p) => p.color && selectedColors.includes(p.color));
     if (statusFilters.includes("in_stock")) out = out.filter((p) => p.inStock);
-    if (statusFilters.includes("on_sale")) out = out.filter((p) => !!p.compareAtPrice);
+    if (sale || statusFilters.includes("on_sale")) out = out.filter((p) => !!p.compareAtPrice);
     if (sort === "low") out.sort((a, b) => a.price - b.price);
     if (sort === "high") out.sort((a, b) => b.price - a.price);
     if (sort === "rating") out.sort((a, b) => b.rating - a.rating);
     return out;
-  }, [category, q, priceMin, priceMax, selectedBrands, selectedColors, statusFilters, sort]);
+  }, [category, q, priceMin, priceMax, selectedBrands, selectedColors, statusFilters, sort, sale]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   const activeCategory = categories.find((c) => c.id === category);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6">
+    <div className="mx-auto max-w-[1440px] px-4 py-6">
       <nav className="mb-4 flex items-center gap-2 text-xs text-muted-foreground">
         <Link to="/" className="hover:text-primary">Home</Link>
         <span>/</span>
@@ -71,9 +73,41 @@ function Browse() {
         ) : null}
       </nav>
 
+      {/* Mobile filters trigger */}
+      <button
+        onClick={() => setFiltersOpen(true)}
+        className="mb-4 inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold md:hidden"
+      >
+        <SlidersHorizontal className="size-4" /> Filters
+      </button>
+
+      {/* Mobile backdrop */}
+      <div
+        onClick={() => setFiltersOpen(false)}
+        className={`fixed inset-0 z-40 bg-ink/40 backdrop-blur-sm transition-opacity md:hidden ${
+          filtersOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      />
+
       <div className="grid grid-cols-1 gap-6 md:grid-cols-[240px_1fr]">
-        {/* Sidebar */}
-        <aside className="space-y-6 md:sticky md:top-24 md:self-start">
+        {/* Sidebar — static on desktop, slide-in drawer on mobile */}
+        <aside
+          className={`fixed inset-y-0 left-0 z-50 w-[300px] max-w-[85vw] space-y-6 overflow-y-auto bg-background p-4 shadow-2xl transition-transform md:static md:z-auto md:w-auto md:max-w-none md:overflow-visible md:bg-transparent md:p-0 md:shadow-none md:transition-none md:sticky md:top-24 md:self-start ${
+            filtersOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          }`}
+          aria-hidden={!filtersOpen}
+        >
+          {/* Drawer header (mobile only) */}
+          <div className="flex items-center justify-between md:hidden">
+            <h2 className="text-lg font-bold">Filters</h2>
+            <button
+              onClick={() => setFiltersOpen(false)}
+              className="grid size-9 place-items-center rounded-full hover:bg-muted"
+              aria-label="Close filters"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
           {/* Price filter */}
           <FilterBlock title="Widget price filter">
             <div className="grid grid-cols-2 gap-2">
@@ -318,7 +352,7 @@ function Browse() {
               }
             >
               {pageItems.map((p) => (
-                <ProductCard key={p.id} product={p} />
+                <ProductCard key={p.id} product={p} layout={view === "list" ? "list" : "grid"} />
               ))}
             </div>
           )}

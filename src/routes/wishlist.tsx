@@ -16,7 +16,7 @@ function Wishlist() {
     .filter((p): p is Product => Boolean(p));
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 md:py-10">
+    <div className="mx-auto max-w-[1440px] px-4 py-6 md:py-10">
       <header className="mb-8">
         <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
           Saved for later

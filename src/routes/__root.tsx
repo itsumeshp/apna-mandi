@@ -82,13 +82,13 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Fresh produce, pantry staples, dairy and ready-to-eat meals — one unified store, one standard, delivered fast.",
+          "Fresh produce, pantry staples, dairy and everyday essentials — one unified store, one standard, delivered fast.",
       },
       { property: "og:title", content: "Apna Mandi — Groceries, delivered under one promise" },
       {
         property: "og:description",
         content:
-          "Fresh produce, pantry staples, dairy and ready-to-eat meals — one unified store, one standard, delivered fast.",
+          "Fresh produce, pantry staples, dairy and everyday essentials — one unified store, one standard, delivered fast.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -100,7 +100,7 @@ export const Route = createRootRoute({
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
   }),

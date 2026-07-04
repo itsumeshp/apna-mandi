@@ -1,11 +1,16 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Search, ShoppingBag, ShoppingBasket, MapPin, Heart, User, ChevronDown, Package, Menu, LayoutGrid } from "lucide-react";
+import { Search, ShoppingBag, ShoppingBasket, MapPin, Heart, User, ChevronDown, Package, Menu, LayoutGrid, TrendingUp, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart, formatPrice } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { CartDrawer } from "@/components/cart-drawer";
+import { LocationPicker } from "@/components/location-picker";
+import { usePersistentState } from "@/hooks/use-persistent-state";
 import { useCategoriesPanel } from "@/lib/categories-panel";
-import { categories } from "@/lib/mock-data";
+import { categories, products } from "@/lib/mock-data";
+
+const isString = (v: unknown): v is string => typeof v === "string";
+const trendingProducts = [...products].sort((a, b) => b.rating - a.rating).slice(0, 5);
 
 function useCountdown(targetHoursFromNow: number) {
   const [end] = useState(() => Date.now() + targetHoursFromNow * 3600 * 1000);
@@ -38,6 +43,10 @@ export function SiteHeader() {
   const { count: wishCount } = useWishlist();
   const [q, setQ] = useState("");
   const [mobileNav, setMobileNav] = useState(false);
+  const [searchFocus, setSearchFocus] = useState(false);
+  const [mobileCat, setMobileCat] = useState<string | null>(null);
+  const [location, setLocation] = usePersistentState<string>("apna-mandi-location", "Noida 62", isString);
+  const [locOpen, setLocOpen] = useState(false);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => s.location.search as { category?: string } });
@@ -45,12 +54,23 @@ export function SiteHeader() {
   const { open: catsOpen, toggle: toggleCats } = useCategoriesPanel();
   const isHome = pathname === "/";
 
-  const submitSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const runSearch = () => {
     const query = q.trim();
     navigate({ to: "/browse", search: query ? { q: query } : {} });
     setMobileNav(false);
+    setSearchFocus(false);
   };
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    runSearch();
+  };
+
+  const needle = q.trim().toLowerCase();
+  const suggestions =
+    needle.length >= 2
+      ? products.filter((p) => p.name.toLowerCase().includes(needle)).slice(0, 6)
+      : [];
 
   const isActive = (to: string, sc?: { category?: string }) => {
     if (to !== pathname) return false;
@@ -62,7 +82,7 @@ export function SiteHeader() {
     <>
       {/* Promo top bar */}
       <div className="w-full bg-primary text-primary-foreground">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-y-1 px-4 py-2 text-xs">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-y-1 px-4 py-2 text-xs">
           <p className="flex items-center gap-2">
             <span className="hidden sm:inline">🛒</span>
             <span>
@@ -81,7 +101,7 @@ export function SiteHeader() {
 
       {/* Utility bar */}
       <div className="hidden w-full border-b border-border bg-muted/50 md:block">
-        <div className="mx-auto flex h-9 max-w-7xl items-center justify-between px-4 text-xs text-muted-foreground">
+        <div className="mx-auto flex h-9 max-w-[1440px] items-center justify-between px-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-5">
             <Link to="/" className="hover:text-primary">About Us</Link>
             <Link to="/orders" className="hover:text-primary">My Account</Link>
@@ -106,7 +126,7 @@ export function SiteHeader() {
 
       {/* Main header */}
       <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 md:gap-6 md:py-4">
+        <div className="mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-3 md:gap-6 md:py-4">
           <button
             onClick={() => setMobileNav((v) => !v)}
             className="grid size-9 shrink-0 place-items-center rounded-md border border-border md:hidden"
@@ -125,25 +145,31 @@ export function SiteHeader() {
             </span>
           </Link>
 
-          <div className="hidden items-center gap-2 border-l border-border pl-4 lg:flex">
+          <button
+            onClick={() => setLocOpen(true)}
+            className="hidden items-center gap-2 border-l border-border pl-4 text-left lg:flex"
+          >
             <MapPin className="size-4 text-primary" />
             <div className="flex flex-col leading-tight">
               <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
                 Deliver to
               </span>
-              <button className="inline-flex items-center gap-1 text-xs font-semibold">
-                Noida 62 <ChevronDown className="size-3" />
-              </button>
+              <span className="inline-flex max-w-[10rem] items-center gap-1 truncate text-xs font-semibold">
+                {location} <ChevronDown className="size-3 shrink-0" />
+              </span>
             </div>
-          </div>
+          </button>
 
           <div className="hidden flex-1 md:flex">
             <form onSubmit={submitSearch} role="search" className="relative w-full">
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
+                onFocus={() => setSearchFocus(true)}
+                onBlur={() => setTimeout(() => setSearchFocus(false), 150)}
                 placeholder="Search for products, categories or brands…"
                 aria-label="Search the store"
+                aria-expanded={searchFocus && suggestions.length > 0}
                 className="h-11 w-full rounded-full border border-border bg-surface pl-5 pr-32 text-sm outline-none transition-shadow focus:border-primary focus:ring-2 focus:ring-primary/15"
               />
               <button
@@ -154,6 +180,45 @@ export function SiteHeader() {
                 <Search className="size-4" />
                 <span className="hidden lg:inline">Search</span>
               </button>
+
+              {/* Live suggestions */}
+              {searchFocus && suggestions.length > 0 ? (
+                <div className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border bg-surface shadow-xl">
+                  <ul className="max-h-96 overflow-y-auto py-1">
+                    {suggestions.map((p) => (
+                      <li key={p.id}>
+                        <Link
+                          to="/products/$id"
+                          params={{ id: p.id }}
+                          onClick={() => {
+                            setSearchFocus(false);
+                            setQ("");
+                          }}
+                          className="flex items-center gap-3 px-3 py-2 hover:bg-muted"
+                        >
+                          <img
+                            src={p.image}
+                            alt=""
+                            className="size-10 shrink-0 rounded-lg object-cover"
+                          />
+                          <span className="min-w-0 flex-1 truncate text-sm">{p.name}</span>
+                          <span className="shrink-0 text-sm font-semibold">
+                            {formatPrice(p.price)}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={runSearch}
+                    className="flex w-full items-center gap-2 border-t border-border px-3 py-2.5 text-sm font-semibold text-primary hover:bg-muted"
+                  >
+                    <Search className="size-4" /> See all results for “{q.trim()}”
+                  </button>
+                </div>
+              ) : null}
             </form>
           </div>
 
@@ -213,7 +278,7 @@ export function SiteHeader() {
 
         {/* Category nav bar */}
         <nav className="hidden border-t border-border bg-background md:block">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5">
+          <div className="mx-auto flex max-w-[1440px] items-center justify-between px-4 py-1.5">
             <div className="flex items-center gap-2">
               {isHome ? (
                 <button
@@ -251,15 +316,53 @@ export function SiteHeader() {
               </ul>
             </div>
             <div className="flex items-center gap-4 text-xs">
-              <button className="inline-flex items-center gap-1 font-semibold text-foreground hover:text-primary">
-                Trending Products <ChevronDown className="size-3" />
-              </button>
+              {/* Trending Products — hover dropdown of top-rated items */}
+              <div className="group relative">
+                <button className="inline-flex items-center gap-1 py-2 font-semibold text-foreground hover:text-primary">
+                  <TrendingUp className="size-3.5" /> Trending Products
+                  <ChevronDown className="size-3 transition-transform group-hover:rotate-180" />
+                </button>
+                <div className="invisible absolute right-0 top-full z-50 w-72 translate-y-1 rounded-2xl border border-border bg-surface p-2 opacity-0 shadow-xl transition-all group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                  <p className="px-2 pb-1 pt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    Top rated this week
+                  </p>
+                  {trendingProducts.map((p) => (
+                    <Link
+                      key={p.id}
+                      to="/products/$id"
+                      params={{ id: p.id }}
+                      className="flex items-center gap-3 rounded-lg p-2 hover:bg-muted"
+                    >
+                      <span className="size-11 shrink-0 overflow-hidden rounded-lg bg-white p-1">
+                        <img src={p.image} alt="" className="size-full object-contain" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[13px] font-medium text-foreground">
+                          {p.name}
+                        </span>
+                        <span className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+                          <Star className="size-3 fill-[#f59e0b] text-[#f59e0b]" />
+                          {p.rating.toFixed(1)}
+                          <span className="text-muted-foreground/40">·</span>
+                          <span className="font-semibold text-sale">{formatPrice(p.price)}</span>
+                        </span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
               <Link
                 to="/browse"
-                className="inline-flex items-center gap-2 font-semibold text-sale"
+                search={{ sale: true }}
+                className="group inline-flex items-center gap-2 font-semibold text-sale"
               >
+                <span className="relative inline-flex size-2">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-sale opacity-70" />
+                  <span className="relative inline-flex size-2 rounded-full bg-sale" />
+                </span>
                 Almost Finished
-                <span className="rounded bg-sale px-1.5 py-0.5 text-[10px] font-bold text-sale-foreground">
+                <span className="animate-pulse rounded bg-sale px-1.5 py-0.5 text-[10px] font-bold text-sale-foreground">
                   SALE
                 </span>
               </Link>
@@ -288,25 +391,71 @@ export function SiteHeader() {
                 All Categories
               </p>
               <ul className="flex flex-col">
-                {categories.map((c) => (
-                  <li key={c.id}>
-                    <Link
-                      to="/browse"
-                      search={{ category: c.id }}
-                      onClick={() => setMobileNav(false)}
-                      className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-                    >
-                      {c.name}
-                      <ChevronDown className="size-4 -rotate-90 text-muted-foreground/50" />
-                    </Link>
-                  </li>
-                ))}
+                {categories.map((c) => {
+                  const hasSubs = c.subcategories.length > 0;
+                  const open = mobileCat === c.id;
+                  return (
+                    <li key={c.id} className="border-b border-border/50 last:border-0">
+                      <div className="flex items-center">
+                        <Link
+                          to="/browse"
+                          search={{ category: c.id }}
+                          onClick={() => setMobileNav(false)}
+                          className="flex-1 rounded-md px-3 py-2.5 text-sm font-medium hover:bg-muted"
+                        >
+                          {c.name}
+                        </Link>
+                        {hasSubs ? (
+                          <button
+                            onClick={() => setMobileCat(open ? null : c.id)}
+                            aria-expanded={open}
+                            aria-label={`${open ? "Collapse" : "Expand"} ${c.name}`}
+                            className="grid size-9 shrink-0 place-items-center"
+                          >
+                            <ChevronDown
+                              className={`size-4 text-muted-foreground transition-transform ${
+                                open ? "rotate-180" : ""
+                              }`}
+                            />
+                          </button>
+                        ) : (
+                          <ChevronDown className="mr-3 size-4 -rotate-90 text-muted-foreground/40" />
+                        )}
+                      </div>
+                      {hasSubs && open ? (
+                        <ul className="mb-1 space-y-0.5 rounded-md bg-muted/40 px-2 py-1">
+                          {c.subcategories.map((s) => (
+                            <li key={s.id}>
+                              <Link
+                                to="/browse"
+                                search={{ category: c.id }}
+                                onClick={() => setMobileNav(false)}
+                                className="block rounded px-3 py-1.5 text-sm text-muted-foreground hover:text-primary"
+                              >
+                                {s.name}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>
         ) : null}
       </header>
       <CartDrawer />
+      <LocationPicker
+        open={locOpen}
+        value={location}
+        onClose={() => setLocOpen(false)}
+        onSelect={(l) => {
+          setLocation(l);
+          setLocOpen(false);
+        }}
+      />
     </>
   );
 }

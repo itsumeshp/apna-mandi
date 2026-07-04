@@ -21,7 +21,7 @@ function CartPage() {
         </div>
         <h1 className="font-heading text-3xl font-bold">Your basket is empty</h1>
         <p className="text-sm text-muted-foreground">
-          Fresh picks, pantry staples, ready meals — you know the drill.
+          Fresh picks, pantry staples, everyday essentials — you know the drill.
         </p>
         <Link
           to="/browse"
@@ -34,7 +34,7 @@ function CartPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 md:py-10">
+    <div className="mx-auto max-w-[1440px] px-4 py-6 md:py-10">
       <header className="mb-8">
         <p className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
           Your basket

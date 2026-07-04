@@ -10,7 +10,7 @@ export function SiteFooter() {
     <>
       {/* Newsletter */}
       <section className="border-t border-border bg-muted/40">
-        <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 md:grid-cols-[1fr_auto] md:items-center">
+        <div className="mx-auto grid max-w-[1440px] gap-6 px-4 py-10 md:grid-cols-[1fr_auto] md:items-center">
           <div>
             <h3 className="font-heading text-2xl font-bold">Join our newsletter for ₹100 off</h3>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -40,7 +40,7 @@ export function SiteFooter() {
             </button>
           </form>
         </div>
-        <p className="mx-auto max-w-7xl px-4 pb-4 text-[11px] text-muted-foreground">
+        <p className="mx-auto max-w-[1440px] px-4 pb-4 text-[11px] text-muted-foreground">
           By subscribing you agree to our{" "}
           <span className="text-primary underline-offset-2 hover:underline">Terms & Conditions</span>{" "}
           and{" "}
@@ -49,7 +49,7 @@ export function SiteFooter() {
       </section>
 
       <footer className="border-t border-border bg-surface">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-10 px-4 py-14 md:grid-cols-6">
+        <div className="mx-auto grid max-w-[1440px] grid-cols-2 gap-10 px-4 py-14 md:grid-cols-6">
           <div className="col-span-2">
             <div className="flex items-center gap-2.5">
               <span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground">
@@ -60,10 +60,11 @@ export function SiteFooter() {
                 <span className="text-primary">Mandi</span>
               </span>
             </div>
-            <h4 className="mt-6 text-sm font-bold">Do You Need Help?</h4>
+            <h4 className="mt-6 text-sm font-bold">One store. One standard.</h4>
             <p className="mt-2 max-w-xs text-xs leading-relaxed text-muted-foreground">
-              Autoseligen syr. Nek difarask fröbomba. Nör antipol kynoda nynat.
-              Pressa fåmoska.
+              Every basket is sourced, checked and packed to the same Apna Mandi
+              promise — farm-fresh produce and trusted staples, delivered across
+              your city in minutes.
             </p>
             <div className="mt-4 flex items-start gap-3">
               <div className="grid size-9 place-items-center rounded-full bg-muted text-primary">
@@ -96,7 +97,7 @@ export function SiteFooter() {
               ["Pantry Staples", "/browse"],
               ["Dairy & Eggs", "/browse"],
               ["Snacks", "/browse"],
-              ["Ready-to-Eat", "/browse"],
+              ["Beverages", "/browse"],
             ]}
           />
           <FooterCol
@@ -146,7 +147,7 @@ export function SiteFooter() {
         </div>
 
         <div className="border-t border-border">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 text-[11px] text-muted-foreground">
+          <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3 px-4 py-4 text-[11px] text-muted-foreground">
             <p>
               Copyright © 2026 <span className="font-semibold text-foreground">Apna Mandi</span> Grocery Co. All rights reserved.
             </p>

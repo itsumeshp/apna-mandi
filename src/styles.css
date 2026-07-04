@@ -5,9 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-heading: "Work Sans", system-ui, sans-serif;
-  --font-body: "Work Sans", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  /* Single-family type system — Inter across the board. Hierarchy comes from
+     weight and size, not from switching typefaces (brand guideline). */
+  --font-heading: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Inter", "Helvetica Neue", Arial, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -39,48 +41,48 @@
 
   --radius-sm: 6px;
   --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
-  --radius-2xl: 28px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
 }
 
 :root {
-  /* Minimalist: neutral greys, white surfaces, generous whitespace.
-     Colour is reserved for function — purple actions, red sale, green stock. */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.22 0 0);
+  /* Apna Mandi — warm, premium, food-focused. Ripe-tomato/vermilion primary
+     over warm cream neutrals. One confident colour; green reserved for
+     in-stock/fresh cues. */
+  --background: oklch(0.986 0.008 72);
+  --foreground: oklch(0.22 0.018 40);
   --surface: oklch(1 0 0);
-  --ink: oklch(0.2 0 0);
-  --muted: oklch(0.972 0 0);
-  --muted-foreground: oklch(0.53 0 0);
-  --border: oklch(0.915 0 0);
-  --input: oklch(0.915 0 0);
-  --ring: oklch(0.6 0.15 64);
+  --ink: oklch(0.2 0.018 40);
+  --muted: oklch(0.955 0.012 70);
+  --muted-foreground: oklch(0.5 0.02 48);
+  --border: oklch(0.9 0.012 66);
+  --input: oklch(0.9 0.012 66);
+  --ring: oklch(0.585 0.2 30);
 
-  /* Primary: deep saffron/marigold — the brand's ownable colour. Links,
-     primary actions, brand mark. Chosen over the templated grocery-purple. */
-  --primary: oklch(0.6 0.15 64);
+  /* Primary: ripe tomato / vermilion — CTAs, links, brand, discount badges. */
+  --primary: oklch(0.585 0.2 30);
   --primary-foreground: oklch(1 0 0);
-  /* Accent: green — in-stock / add-to-cart */
-  --accent: oklch(0.62 0.17 145);
+  /* Accent: fresh herb green — in-stock / freshness cues only. */
+  --accent: oklch(0.58 0.14 150);
   --accent-foreground: oklch(1 0 0);
-  --success: oklch(0.62 0.17 145);
+  --success: oklch(0.58 0.14 150);
   --success-foreground: oklch(1 0 0);
-  /* Sale/discount red */
-  --sale: oklch(0.6 0.22 25);
+  /* Sale = the brand vermilion. */
+  --sale: oklch(0.585 0.2 30);
   --sale-foreground: oklch(1 0 0);
 
-  /* Retained token names, repurposed to neutral greys. */
-  --kraft: oklch(0.972 0 0);
-  --kraft-dark: oklch(0.52 0 0);
+  /* Retained token names, repurposed to warm neutrals. */
+  --kraft: oklch(0.955 0.012 70);
+  --kraft-dark: oklch(0.5 0.02 48);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.22 0 0);
+  --card-foreground: oklch(0.22 0.018 40);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.22 0 0);
-  --secondary: oklch(0.972 0 0);
-  --secondary-foreground: oklch(0.22 0 0);
-  --destructive: oklch(0.58 0.22 27);
+  --popover-foreground: oklch(0.22 0.018 40);
+  --secondary: oklch(0.955 0.012 70);
+  --secondary-foreground: oklch(0.22 0.018 40);
+  --destructive: oklch(0.585 0.2 30);
   --destructive-foreground: oklch(1 0 0);
 }
 
@@ -92,6 +94,72 @@
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4, h5 { font-family: var(--font-heading); letter-spacing: -0.02em; font-weight: 700; }
-  .font-mono, code, kbd, samp, pre { font-family: var(--font-mono); }
+  h1, h2, h3, h4, h5 { font-family: var(--font-heading); letter-spacing: -0.01em; font-weight: 600; line-height: 1.2; }
+  h1 { letter-spacing: -0.02em; }
+  /* `.font-mono` no longer means a mono typeface — it now flags numeric/label
+     runs (prices, counts, timers) that want tabular figures for column-aligned
+     scanning. Same Inter face, tabular numerals. */
+  .font-mono, code, kbd, samp, pre {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ── Hero carousel motion ─────────────────────────────────────────────
+   Plain CSS (not Tailwind utilities) so it always compiles, even in new
+   files. Staggered reveal + ambient float/blob loops. */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes hero-pop {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-16px); }
+}
+@keyframes hero-blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(24px, -18px) scale(1.08); }
+  66%      { transform: translate(-18px, 14px) scale(0.94); }
+}
+@keyframes hero-glow {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%      { opacity: 0.9;  transform: scale(1.06); }
+}
+@keyframes hero-progress { from { width: 0%; } to { width: 100%; } }
+
+.hero-rise { animation: hero-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.hero-pop  { animation: hero-pop 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.hero-float { animation: hero-float 6s ease-in-out infinite; }
+.hero-blob { animation: hero-blob 20s ease-in-out infinite; }
+.hero-glow { animation: hero-glow 5s ease-in-out infinite; }
+.hero-progress-fill { animation: hero-progress linear forwards; }
+.hero-paused .hero-progress-fill,
+.hero-paused .hero-float,
+.hero-paused .hero-blob { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-rise, .hero-pop, .hero-float, .hero-blob, .hero-glow, .hero-progress-fill {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Fluid centered container — brief grid rules: 1440 max, content = 100% - 64px
+   on desktop, 24px tablet padding, 16px mobile padding. */
+.container-page {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+@media (min-width: 640px) {
+  .container-page { padding-inline: 24px; }
+}
+@media (min-width: 1024px) {
+  .container-page { padding-inline: 32px; }
 }

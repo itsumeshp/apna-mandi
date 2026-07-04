@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingCart, Heart, Star, Check } from "lucide-react";
-import { useState } from "react";
+import { Heart, Star, Minus, Plus, Leaf } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { Product } from "@/lib/mock-data";
 import { discountPct } from "@/lib/mock-data";
 import { useCart, formatPrice } from "@/lib/cart-store";
@@ -11,6 +11,46 @@ const badgeStyles: Record<string, { label: string; className: string }> = {
   cold_sale: { label: "Cold Sale", className: "bg-primary text-primary-foreground" },
   bestseller: { label: "Best Seller", className: "bg-accent text-accent-foreground" },
 };
+
+// Client-only offer countdown. Renders null on the server and first client
+// paint (avoids hydration mismatch), then ticks once mounted.
+function OfferCountdown({ hours }: { hours: number }) {
+  const [left, setLeft] = useState<number | null>(null);
+
+  useEffect(() => {
+    const end = Date.now() + hours * 3600 * 1000;
+    const tick = () => setLeft(Math.max(0, end - Date.now()));
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
+  }, [hours]);
+
+  // Reserve the same line height before mount, so cards don't shift.
+  if (left === null) return <div className="h-4" />;
+
+  const s = Math.floor(left / 1000);
+  const parts = [
+    { v: Math.floor(s / 86400), l: "d" },
+    { v: Math.floor((s % 86400) / 3600), l: "h" },
+    { v: Math.floor((s % 3600) / 60), l: "m" },
+    { v: s % 60, l: "s" },
+  ];
+
+  return (
+    <div className="flex items-center gap-1 font-mono text-[10px]">
+      <span className="text-muted-foreground">Ends in</span>
+      {parts.map((p) => (
+        <span
+          key={p.l}
+          className="rounded bg-muted px-1 py-0.5 font-semibold text-foreground"
+        >
+          {String(p.v).padStart(2, "0")}
+          {p.l}
+        </span>
+      ))}
+    </div>
+  );
+}
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -29,21 +69,33 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-export function ProductCard({ product }: { product: Product }) {
-  const { add } = useCart();
+export function ProductCard({
+  product,
+  layout = "grid",
+}: {
+  product: Product;
+  layout?: "grid" | "list";
+}) {
+  const list = layout === "list";
+  const { items, add, setQty } = useCart();
   const { has, toggle } = useWishlist();
-  const [added, setAdded] = useState(false);
   const discount = discountPct(product);
   const badge = product.badge ? badgeStyles[product.badge] : null;
   const liked = has(product.id);
+  const cartQty = items.find((i) => i.productId === product.id)?.qty ?? 0;
 
-  const onAdd = (e: React.MouseEvent) => {
+  const inc = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!product.inStock) return;
     add(product.id, 1);
-    setAdded(true);
-    window.setTimeout(() => setAdded(false), 900);
+  };
+
+  const dec = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (cartQty <= 0) return;
+    setQty(product.id, cartQty - 1);
   };
 
   const onWish = (e: React.MouseEvent) => {
@@ -56,9 +108,17 @@ export function ProductCard({ product }: { product: Product }) {
     <Link
       to="/products/$id"
       params={{ id: product.id }}
-      className="group relative flex flex-col rounded-xl border border-border bg-surface transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+      className={`group relative flex rounded-2xl border border-border bg-surface transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg ${
+        list ? "flex-row" : "flex-col"
+      }`}
     >
-      <div className="relative aspect-square overflow-hidden rounded-t-xl bg-white p-3">
+      <div
+        className={`relative aspect-square shrink-0 overflow-hidden bg-white p-4 ${
+          list
+            ? "w-32 rounded-l-2xl sm:w-40"
+            : "rounded-t-2xl"
+        }`}
+      >
         <img
           src={product.image}
           alt={product.name}
@@ -81,17 +141,17 @@ export function ProductCard({ product }: { product: Product }) {
         >
           <Heart className={`size-4 ${liked ? "fill-current" : ""}`} />
         </button>
+      </div>
 
+      <div className="flex flex-1 flex-col gap-1.5 p-4">
         {badge ? (
           <span
-            className={`absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${badge.className}`}
+            className={`inline-flex w-fit items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${badge.className}`}
           >
+            {product.badge === "organic" ? <Leaf className="size-3" /> : null}
             {badge.label}
           </span>
         ) : null}
-      </div>
-
-      <div className="flex flex-col gap-1.5 border-t border-border p-3">
         <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-medium leading-snug text-foreground group-hover:text-primary">
           {product.name}
         </h3>
@@ -111,29 +171,40 @@ export function ProductCard({ product }: { product: Product }) {
             </span>
           ) : null}
         </div>
-        <button
-          onClick={onAdd}
-          disabled={!product.inStock}
-          className={`mt-1 inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-[11px] font-bold uppercase tracking-wider transition-colors ${
-            !product.inStock
-              ? "bg-muted text-muted-foreground"
-              : added
-                ? "bg-accent text-accent-foreground"
-                : "bg-success/10 text-success hover:bg-success hover:text-success-foreground"
-          }`}
-        >
-          {added ? (
-            <>
-              <Check className="size-3.5" /> Added
-            </>
-          ) : !product.inStock ? (
-            "Out of Stock"
-          ) : (
-            <>
-              <ShoppingCart className="size-3.5" /> In Stock
-            </>
-          )}
-        </button>
+        {product.compareAtPrice ? (
+          <OfferCountdown hours={40 * 24 + (product.reviewCount % 24)} />
+        ) : (
+          <p className="flex h-4 items-center text-[10px] text-muted-foreground">
+            In stock · ready to ship
+          </p>
+        )}
+        {/* Quantity stepper — mt-auto keeps it pinned to the card base */}
+        {product.inStock ? (
+          <div className="mt-auto flex items-center justify-between rounded-full border border-border p-1">
+            <button
+              onClick={dec}
+              disabled={cartQty <= 0}
+              aria-label="Decrease quantity"
+              className="grid size-8 place-items-center rounded-full text-foreground transition-colors hover:bg-muted disabled:opacity-40 disabled:hover:bg-transparent"
+            >
+              <Minus className="size-4" />
+            </button>
+            <span className="min-w-6 text-center font-mono text-sm font-semibold">
+              {cartQty}
+            </span>
+            <button
+              onClick={inc}
+              aria-label="Add to cart"
+              className="grid size-8 place-items-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              <Plus className="size-4" />
+            </button>
+          </div>
+        ) : (
+          <p className="mt-auto rounded-full bg-muted py-2 text-center text-xs font-semibold text-muted-foreground">
+            Out of stock
+          </p>
+        )}
       </div>
     </Link>
   );

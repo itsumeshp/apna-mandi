@@ -58,7 +58,7 @@ export function CartDrawer() {
             </div>
             <p className="font-heading text-lg font-semibold">Your basket is empty</p>
             <p className="text-sm text-muted-foreground">
-              Add fresh picks, pantry staples, or a ready meal.
+              Add fresh picks, pantry staples, or a carton of milk.
             </p>
             <Link
               to="/browse"
