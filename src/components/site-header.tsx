@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Search, ShoppingBag, MapPin, Heart, User, ChevronDown, Package, Menu, LayoutGrid } from "lucide-react";
+import { Search, ShoppingBag, ShoppingBasket, MapPin, Heart, User, ChevronDown, Package, Menu, LayoutGrid } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useCart, formatPrice } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
@@ -115,12 +115,13 @@ export function SiteHeader() {
             <Menu className="size-4" />
           </button>
 
-          <Link to="/" className="flex shrink-0 items-center gap-2">
-            <div className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <span className="font-heading text-xl font-bold leading-none">A</span>
-            </div>
-            <span className="font-heading text-2xl font-bold tracking-tight text-foreground">
-              Apna Mandi
+          <Link to="/" className="flex shrink-0 items-center gap-2.5">
+            <span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+              <ShoppingBasket className="size-5" />
+            </span>
+            <span className="text-2xl font-extrabold leading-none tracking-tight">
+              <span className="text-foreground">Apna</span>
+              <span className="text-primary">Mandi</span>
             </span>
           </Link>
 

@@ -55,10 +55,11 @@
   --muted-foreground: oklch(0.53 0 0);
   --border: oklch(0.915 0 0);
   --input: oklch(0.915 0 0);
-  --ring: oklch(0.44 0.18 295);
+  --ring: oklch(0.6 0.15 64);
 
-  /* Primary: purple — links and primary actions only */
-  --primary: oklch(0.45 0.16 292);
+  /* Primary: deep saffron/marigold — the brand's ownable colour. Links,
+     primary actions, brand mark. Chosen over the templated grocery-purple. */
+  --primary: oklch(0.6 0.15 64);
   --primary-foreground: oklch(1 0 0);
   /* Accent: green — in-stock / add-to-cart */
   --accent: oklch(0.62 0.17 145);

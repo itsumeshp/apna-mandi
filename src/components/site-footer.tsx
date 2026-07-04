@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Twitter, Instagram, Linkedin, Phone, Mail } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Phone, Mail, ShoppingBasket } from "lucide-react";
 import { useState } from "react";
 
 export function SiteFooter() {
@@ -51,11 +51,14 @@ export function SiteFooter() {
       <footer className="border-t border-border bg-surface">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-10 px-4 py-14 md:grid-cols-6">
           <div className="col-span-2">
-            <div className="flex items-center gap-2">
-              <div className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground">
-                <span className="font-heading text-lg font-bold leading-none">A</span>
-              </div>
-              <span className="font-heading text-xl font-bold">Apna Mandi</span>
+            <div className="flex items-center gap-2.5">
+              <span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground">
+                <ShoppingBasket className="size-5" />
+              </span>
+              <span className="text-xl font-extrabold leading-none tracking-tight">
+                <span className="text-foreground">Apna</span>
+                <span className="text-primary">Mandi</span>
+              </span>
             </div>
             <h4 className="mt-6 text-sm font-bold">Do You Need Help?</h4>
             <p className="mt-2 max-w-xs text-xs leading-relaxed text-muted-foreground">
