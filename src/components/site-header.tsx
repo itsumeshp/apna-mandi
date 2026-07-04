@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useCart, formatPrice } from "@/lib/cart-store";
 import { useWishlist } from "@/lib/wishlist-store";
 import { CartDrawer } from "@/components/cart-drawer";
+import { CategoryMenu } from "@/components/category-menu";
+import { categories } from "@/lib/mock-data";
 
 function useCountdown(targetHoursFromNow: number) {
   const [end] = useState(() => Date.now() + targetHoursFromNow * 3600 * 1000);
@@ -208,27 +210,30 @@ export function SiteHeader() {
 
         {/* Category nav bar */}
         <nav className="hidden border-t border-border bg-background md:block">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4">
-            <ul className="flex items-center">
-              {catNav.map((c) => {
-                const active = isActive(c.to, c.search);
-                return (
-                  <li key={c.label}>
-                    <Link
-                      to={c.to}
-                      search={c.search as { category: string } | undefined}
-                      className={`inline-flex items-center gap-1 border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${
-                        active
-                          ? "border-primary text-primary"
-                          : "border-transparent text-foreground hover:text-primary"
-                      }`}
-                    >
-                      {c.label}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5">
+            <div className="flex items-center gap-2">
+              <CategoryMenu />
+              <ul className="flex items-center">
+                {catNav.map((c) => {
+                  const active = isActive(c.to, c.search);
+                  return (
+                    <li key={c.label}>
+                      <Link
+                        to={c.to}
+                        search={c.search as { category: string } | undefined}
+                        className={`inline-flex items-center gap-1 border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${
+                          active
+                            ? "border-primary text-primary"
+                            : "border-transparent text-foreground hover:text-primary"
+                        }`}
+                      >
+                        {c.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
             <div className="flex items-center gap-4 text-xs">
               <button className="inline-flex items-center gap-1 font-semibold text-foreground hover:text-primary">
                 Trending Products <ChevronDown className="size-3" />
@@ -262,6 +267,29 @@ export function SiteHeader() {
                 </li>
               ))}
             </ul>
+            <div className="border-t border-border p-2">
+              <p className="px-3 pb-1 pt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Departments
+              </p>
+              <ul className="flex flex-col">
+                {categories.map((c) => (
+                  <li key={c.id}>
+                    <Link
+                      to="/browse"
+                      search={{ category: c.id }}
+                      onClick={() => setMobileNav(false)}
+                      className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+                    >
+                      <span
+                        className="inline-block size-3 rounded-full"
+                        style={{ backgroundColor: c.tint }}
+                      />
+                      {c.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         ) : null}
       </header>
